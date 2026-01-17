@@ -26,9 +26,24 @@ function PLUGIN:Available(ctx)
         end
     end
 
-    -- Sort versions (simple string sort works for semver with same digit counts)
+    -- Parse version string into numeric components
+    local function parse_version(v)
+        local major, minor, patch = v:match("^(%d+)%.(%d+)%.(%d+)$")
+        return tonumber(major) or 0, tonumber(minor) or 0, tonumber(patch) or 0
+    end
+
+    -- Sort versions using semantic versioning (descending order - newest first)
     table.sort(results, function(a, b)
-        return a.version < b.version
+        local a_major, a_minor, a_patch = parse_version(a.version)
+        local b_major, b_minor, b_patch = parse_version(b.version)
+
+        if a_major ~= b_major then
+            return a_major > b_major
+        end
+        if a_minor ~= b_minor then
+            return a_minor > b_minor
+        end
+        return a_patch > b_patch
     end)
 
     return results
